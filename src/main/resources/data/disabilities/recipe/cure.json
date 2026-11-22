@@ -1,0 +1,16 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"key": {
+		"G": "minecraft:glowstone_dust",
+		"A": "minecraft:golden_apple",
+		"B": "minecraft:glass_bottle"
+	},
+	"pattern": [
+		" G ",
+		"GAG",
+		" B "
+	],
+	"result": {
+		"id": "disabilities:cure"
+	}
+}

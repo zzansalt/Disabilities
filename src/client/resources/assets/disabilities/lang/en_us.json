@@ -1,0 +1,15 @@
+{
+	"key.category.disabilities.disabilities": "Disabilities",
+	"key.disabilities.toggle_list": "Toggle Condition List",
+	"item.disabilities.cure": "Cure",
+	"death.attack.disabilities.asthma": "%1$s ran out of breath",
+	"death.attack.disabilities.diabetes": "%1$s suffered from sugar overload",
+	"death.attack.disabilities.eating_disorder": "%1$s couldn't keep their food down",
+	"death.attack.disabilities.lactose": "%1$s had a fatal reaction to dairy",
+	"death.attack.disabilities.ocd": "%1$s failed to satisfy a compulsion",
+	"death.attack.disabilities.ocd_overdid": "%1$s went past the compulsion limit",
+	"death.attack.disabilities.seizure": "%1$s succumbed to a seizure",
+	"death.attack.disabilities.claustrophobia": "%1$s panicked in an enclosed space",
+	"death.attack.disabilities.nyctophobia": "%1$s was consumed by fear of the dark",
+	"death.attack.disabilities.aquaphobia": "%1$s couldn't bear touching water"
+}

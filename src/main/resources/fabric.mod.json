@@ -1,0 +1,34 @@
+{
+	"schemaVersion": 1,
+	"id": "disabilities",
+	"version": "${version}",
+	"name": "Disabilities",
+	"description": "Survival challenge mod that grants a random disability condition every 10 minutes.",
+	"authors": [
+		"zzansalt"
+	],
+	"license": "MIT",
+	"icon": "assets/disabilities/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"io.github.disabilities.Disabilities"
+		],
+		"client": [
+			"io.github.disabilities.client.DisabilitiesClient"
+		]
+	},
+	"mixins": [
+		"disabilities.mixins.json",
+		{
+			"config": "disabilities.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.20.1",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

@@ -1,0 +1,15 @@
+{
+	"required": true,
+	"package": "io.github.disabilities.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"InventoryDropMixin",
+		"ContainerMenuMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}

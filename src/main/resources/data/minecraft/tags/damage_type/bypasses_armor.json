@@ -1,0 +1,15 @@
+{
+	"replace": false,
+	"values": [
+		"disabilities:asthma",
+		"disabilities:diabetes",
+		"disabilities:eating_disorder",
+		"disabilities:lactose",
+		"disabilities:ocd",
+		"disabilities:ocd_overdid",
+		"disabilities:seizure",
+		"disabilities:claustrophobia",
+		"disabilities:nyctophobia",
+		"disabilities:aquaphobia"
+	]
+}

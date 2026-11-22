@@ -1,0 +1,37 @@
+{
+	"required": true,
+	"package": "io.github.disabilities.client.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"MinecraftActionInvoker",
+		"ParkinsonsAimMixin",
+		"ClientInputAccessor",
+		"PlayerInputMixin",
+		"CameraRollMixin",
+		"ColorBlindPostMixin",
+		"DeafSoundMixin",
+		"BlindNoSprintMixin",
+		"LegFovMixin",
+		"DistortionOptionMixin",
+		"DyslexiaStyleMixin",
+		"DyslexiaScreenMixin",
+		"HudOverlayMixin",
+		"DementiaContainerMixin",
+		"LevelRendererPhantomMixin",
+		"EntityRenderStateMobMixin",
+		"ProsopagnosiaRenderMixin",
+		"MobNameplateMixin",
+		"MobHitboxMixin",
+		"AvatarRenderStateLimbMixin",
+		"AvatarRendererLimbMixin",
+		"PlayerModelLimbMixin",
+		"AstigmatismRenderDistanceMixin",
+		"HallucinationAttackMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}

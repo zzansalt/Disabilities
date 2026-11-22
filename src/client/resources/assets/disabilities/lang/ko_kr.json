@@ -1,0 +1,15 @@
+{
+	"key.category.disabilities.disabilities": "Disabilities",
+	"key.disabilities.toggle_list": "장애 목록 표시 전환",
+	"item.disabilities.cure": "치료제",
+	"death.attack.disabilities.asthma": "%1$s님이 숨이 차 쓰러졌습니다",
+	"death.attack.disabilities.diabetes": "%1$s님이 과도한 당분 섭취로 쓰러졌습니다",
+	"death.attack.disabilities.eating_disorder": "%1$s님이 음식을 먹고 고통을 이기지 못했습니다",
+	"death.attack.disabilities.lactose": "%1$s님이 유제품을 견디지 못했습니다",
+	"death.attack.disabilities.ocd": "%1$s님이 강박 과제를 완수하지 못했습니다",
+	"death.attack.disabilities.ocd_overdid": "%1$s님이 강박 과제 횟수를 초과했습니다",
+	"death.attack.disabilities.seizure": "%1$s님이 발작으로 쓰러졌습니다",
+	"death.attack.disabilities.claustrophobia": "%1$s님이 좁은 공간에서 공황에 빠졌습니다",
+	"death.attack.disabilities.nyctophobia": "%1$s님이 어둠의 공포를 이기지 못했습니다",
+	"death.attack.disabilities.aquaphobia": "%1$s님이 물에 닿아 공황에 빠졌습니다"
+}
