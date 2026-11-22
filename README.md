@@ -2,7 +2,7 @@
 
 기본 **10분마다 무작위 질병 또는 공포증(총 44종)**이 하나씩 발현되는 Minecraft Fabric 서바이벌 챌린지 모드입니다.
 
-* **지원 환경**: Minecraft `26.3` / Fabric Loader `>=0.20.1` / Fabric API / Java `25`
+* **지원 환경**: Minecraft `26.x` (`>=26.0 <27.0`) / Fabric Loader `>=0.19.0` / Fabric API / Java `25`
 * **설치 위치**: 클라이언트 + 서버 양측 필수 (`environment: "*"`)
 * **라이선스**: MIT
 
