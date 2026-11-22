@@ -56,7 +56,7 @@ public final class ModHudRenderer {
 	}
 
 	private static void renderConditionList(GuiGraphicsExtractor graphics, Minecraft mc, int mouseX, int mouseY) {
-		if (!ClientConditionState.isListVisible() || ClientConditionState.hasLocal(ConditionType.ANOSOGNOSIA)) {
+		if (!ClientConditionState.isListVisible()) {
 			return;
 		}
 
@@ -84,8 +84,11 @@ public final class ModHudRenderer {
 				return;
 			}
 
+			boolean anosognosia = ClientConditionState.hasLocal(ConditionType.ANOSOGNOSIA);
+			Iterable<ConditionType> shown = anosognosia ? List.of(ConditionType.ANOSOGNOSIA) : active;
+
 			ConditionType hovered = null;
-			for (ConditionType cond : active) {
+			for (ConditionType cond : shown) {
 				Component label = Component.literal("• " + cond.getDisplayName()).withStyle(cond.color);
 				int w = font.width(label);
 				boolean isHover = mouseX >= x - 2 && mouseX <= x + w + 4 && mouseY >= y - 1 && mouseY <= y + ROW_HEIGHT - 1;

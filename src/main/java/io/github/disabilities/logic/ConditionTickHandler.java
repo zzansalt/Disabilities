@@ -23,6 +23,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerInput;
@@ -48,6 +49,7 @@ public final class ConditionTickHandler {
 	private static final Identifier MOD_SHORT_SCALE = Disabilities.id("short_scale");
 	private static final Identifier MOD_SHORT_BLOCK_REACH = Disabilities.id("short_block_reach");
 	private static final Identifier MOD_SHORT_ENTITY_REACH = Disabilities.id("short_entity_reach");
+	private static final Identifier MOD_SHORT_JUMP = Disabilities.id("short_jump");
 	private static final Identifier MOD_LEG_GROUND_SPEED = Disabilities.id("amputated_leg_speed");
 	private static final Identifier MOD_ARTHRITIS_ATTACK = Disabilities.id("arthritis_attack");
 	private static final Identifier MOD_ARTHRITIS_MINE = Disabilities.id("arthritis_mine");
@@ -76,6 +78,7 @@ public final class ConditionTickHandler {
 		int pyroTicker = 0;
 		int agoraExposureTicks = 0;
 		int acroTicker = 0;
+		int arachnoTicker = 0;
 		int cancerTicker = 0;
 		int seizureTicks = 0;
 		int seizureDamageTicker = 0;
@@ -131,6 +134,7 @@ public final class ConditionTickHandler {
 			applyPyrophobia(player, level, rt);
 			applyAgoraphobia(player, level, rt);
 			applyAcrophobia(player, rt);
+			applyArachnophobia(player, level, rt);
 
 			rt.ocd.tick(player, level);
 			syncOcdLine(player, rt);
@@ -207,6 +211,7 @@ public final class ConditionTickHandler {
 		syncModifier(player.getAttribute(Attributes.SCALE), MOD_SHORT_SCALE, active, -0.1667, AttributeModifier.Operation.ADD_VALUE);
 		syncModifier(player.getAttribute(Attributes.BLOCK_INTERACTION_RANGE), MOD_SHORT_BLOCK_REACH, active, -0.5, AttributeModifier.Operation.ADD_VALUE);
 		syncModifier(player.getAttribute(Attributes.ENTITY_INTERACTION_RANGE), MOD_SHORT_ENTITY_REACH, active, -0.5, AttributeModifier.Operation.ADD_VALUE);
+		syncModifier(player.getAttribute(Attributes.JUMP_STRENGTH), MOD_SHORT_JUMP, active, -0.38, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 	}
 
 	private static void applyArthritis(ServerPlayer player) {
@@ -546,9 +551,27 @@ public final class ConditionTickHandler {
 			return;
 		}
 		rt.acroTicker = 0;
-		if (player.getY() >= 60.0) {
+		if (player.getY() >= 65.0) {
 			player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 80, 0, true, false, true));
 			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 1, true, false, true));
+		}
+	}
+
+	private static void applyArachnophobia(ServerPlayer player, ServerLevel level, PlayerRuntime rt) {
+		if (!ConditionStore.has(player.getUUID(), ConditionType.ARACHNOPHOBIA) || !player.isAlive() || player.isCreative() || player.isSpectator()) {
+			rt.arachnoTicker = 0;
+			return;
+		}
+		rt.arachnoTicker++;
+		if (rt.arachnoTicker < 10) {
+			return;
+		}
+		rt.arachnoTicker = 0;
+
+		List<Spider> nearby = level.getEntitiesOfClass(Spider.class, player.getBoundingBox().inflate(10.0), Spider::isAlive);
+		if (!nearby.isEmpty()) {
+			player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 1, false, true, true));
+			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 1, false, true, true));
 		}
 	}
 

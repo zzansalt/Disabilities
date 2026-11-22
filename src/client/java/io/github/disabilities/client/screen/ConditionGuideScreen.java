@@ -69,13 +69,26 @@ public class ConditionGuideScreen extends Screen {
 		return "";
 	}
 
+	private boolean isViewingSelf() {
+		if (!this.isOp) {
+			return true;
+		}
+		UUID selected = selectedTargetId();
+		UUID local = this.minecraft != null && this.minecraft.player != null ? this.minecraft.player.getUUID() : null;
+		return selected != null && selected.equals(local);
+	}
+
+	private boolean isStatusMasked() {
+		return isViewingSelf() && ClientConditionState.hasLocal(ConditionType.ANOSOGNOSIA);
+	}
+
 	private Set<ConditionType> viewedActiveSet() {
+		if (isStatusMasked()) {
+			return Set.of();
+		}
 		if (this.isOp) {
 			UUID id = selectedTargetId();
 			return id == null ? Set.of() : ConditionAccess.clientConditions(id);
-		}
-		if (ClientConditionState.hasLocal(ConditionType.ANOSOGNOSIA)) {
-			return Set.of();
 		}
 		return ClientConditionState.localConditions();
 	}
@@ -139,11 +152,11 @@ public class ConditionGuideScreen extends Screen {
 
 		rebuildRowButtons();
 
-		boolean hideActiveStatus = !this.isOp && ClientConditionState.hasLocal(ConditionType.ANOSOGNOSIA);
-		int activeCount = hideActiveStatus ? 0 : viewedActiveSet().size();
+		boolean masked = isStatusMasked();
+		String activeCountStr = masked ? "?" : String.valueOf(viewedActiveSet().size());
 
 		String filterLabel = this.activeOnly
-			? (ko ? "보유 중 (" + activeCount + ")" : "Active (" + activeCount + ")")
+			? (ko ? "보유 중 (" + activeCountStr + ")" : "Active (" + activeCountStr + ")")
 			: (ko ? "전체 (" + ConditionType.values().length + ")" : "All (" + ConditionType.values().length + ")");
 
 		this.addRenderableWidget(Button.builder(Component.literal(filterLabel), btn -> {
@@ -186,6 +199,7 @@ public class ConditionGuideScreen extends Screen {
 		}
 
 		boolean ko = ModConfig.isKorean();
+		boolean masked = isStatusMasked();
 		UUID targetId = selectedTargetId();
 		Set<ConditionType> activeSet = viewedActiveSet();
 		int cardLeft = this.panelLeft + 10;
@@ -197,7 +211,7 @@ public class ConditionGuideScreen extends Screen {
 		for (int i = 0; i < rows && (this.scrollOffset + i) < entries.size(); i++) {
 			ConditionType cond = entries.get(this.scrollOffset + i);
 			boolean active = activeSet.contains(cond);
-			Component btnLabel = toggleLabel(active, ko);
+			Component btnLabel = toggleLabel(active, ko, masked);
 			Button toggleBtn = Button.builder(btnLabel, b -> {
 				if (targetId != null) {
 					ClientPlayNetworking.send(new ModPackets.AdminToggleConditionPacket(targetId, cond.ordinal()));
@@ -209,7 +223,10 @@ public class ConditionGuideScreen extends Screen {
 		}
 	}
 
-	private static Component toggleLabel(boolean active, boolean ko) {
+	private static Component toggleLabel(boolean active, boolean ko, boolean masked) {
+		if (masked) {
+			return Component.literal(ko ? "전환" : "Toggle").withStyle(ChatFormatting.YELLOW);
+		}
 		if (active) {
 			return Component.literal(ko ? "제거" : "Remove").withStyle(ChatFormatting.RED);
 		}
@@ -283,7 +300,7 @@ public class ConditionGuideScreen extends Screen {
 			graphics.fill(this.panelLeft, this.panelTop, this.panelLeft + this.panelWidth, this.panelTop + 28, 0xFF1D2436);
 
 			boolean ko = ModConfig.isKorean();
-			boolean hideActive = !this.isOp && ClientConditionState.hasLocal(ConditionType.ANOSOGNOSIA);
+			boolean masked = isStatusMasked();
 			Set<ConditionType> activeSet = viewedActiveSet();
 			List<ConditionType> entries = displayedEntries();
 
@@ -294,8 +311,8 @@ public class ConditionGuideScreen extends Screen {
 				this.panelLeft + 12, this.panelTop + 10, 0xFFFFFFFF, true);
 
 			String countBadge = ko
-				? "보유 중: " + (hideActive ? "?" : activeSet.size())
-				: "Active: " + (hideActive ? "?" : activeSet.size());
+				? "보유 중: " + (masked ? "?" : activeSet.size())
+				: "Active: " + (masked ? "?" : activeSet.size());
 			int badgeW = this.font.width(countBadge);
 			graphics.text(this.font, countBadge, this.panelLeft + this.panelWidth - badgeW - 12, this.panelTop + 10, 0xFFFF8888, true);
 
@@ -310,7 +327,7 @@ public class ConditionGuideScreen extends Screen {
 					this.panelLeft + 16, barY + 5, 0xFFFFFFFF, true);
 
 				for (RowToggleButton rb : this.rowButtons) {
-					rb.button.setMessage(toggleLabel(activeSet.contains(rb.condition), ko));
+					rb.button.setMessage(toggleLabel(activeSet.contains(rb.condition), ko, masked));
 				}
 			}
 
@@ -325,16 +342,21 @@ public class ConditionGuideScreen extends Screen {
 			int textWidth = this.isOp ? cardWidth - 62 : cardWidth - 14;
 
 			if (entries.isEmpty()) {
-				String empty = !this.searchQuery.isBlank()
-					? (ko ? "검색 결과가 없습니다." : "No matching conditions found.")
-					: (ko ? "표시할 질병이 없습니다." : "No conditions to display.");
+				String empty;
+				if (this.activeOnly && masked) {
+					empty = ko ? "질병인식불능증으로 보유 여부를 확인할 수 없습니다." : "Anosognosia hides your active condition list.";
+				} else if (!this.searchQuery.isBlank()) {
+					empty = ko ? "검색 결과가 없습니다." : "No matching conditions found.";
+				} else {
+					empty = ko ? "표시할 질병이 없습니다." : "No conditions to display.";
+				}
 				int ew = this.font.width(empty);
 				graphics.text(this.font, empty, this.panelLeft + (this.panelWidth - ew) / 2, (this.listTop + this.listBottom) / 2 - 4, 0xFF99A2B2, true);
 			} else {
 				int y = this.listTop;
 				for (int i = 0; i < rows && (this.scrollOffset + i) < entries.size(); i++) {
 					ConditionType cond = entries.get(this.scrollOffset + i);
-					boolean hasIt = activeSet.contains(cond);
+					boolean hasIt = !masked && activeSet.contains(cond);
 
 					int bgColor = hasIt ? 0xE02A1820 : 0xD01B2030;
 					graphics.fill(cardLeft, y, cardLeft + cardWidth, y + CARD_HEIGHT, bgColor);
@@ -345,7 +367,12 @@ public class ConditionGuideScreen extends Screen {
 					Component nameComp = Component.literal(cond.getDisplayName()).withStyle(cond.color, ChatFormatting.BOLD);
 					graphics.text(this.font, nameComp, cardLeft + 8, y + 4, 0xFFFFFFFF, true);
 
-					if (hasIt) {
+					if (masked) {
+						String tag = "[?]";
+						int nameW = this.font.width(nameComp);
+						int tagX = this.isOp ? (cardLeft + 14 + nameW) : (cardLeft + cardWidth - this.font.width(tag) - 6);
+						graphics.text(this.font, tag, tagX, y + 4, 0xFFFFD166, true);
+					} else if (hasIt) {
 						String tag = ko ? "[보유 중]" : "[ACTIVE]";
 						int nameW = this.font.width(nameComp);
 						int tagX = this.isOp ? (cardLeft + 14 + nameW) : (cardLeft + cardWidth - this.font.width(tag) - 6);

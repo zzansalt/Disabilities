@@ -41,8 +41,8 @@ public enum ConditionType {
 		"Most in-game text is scrambled and unreadable",
 		"대부분의 게임 내 글자가 깨져 읽을 수 없습니다"),
 	SHORT("Short", "저신장", ChatFormatting.DARK_AQUA,
-		"Reduced height and shortened interaction reach",
-		"키가 작아지고 상호작용 사거리가 짧아집니다"),
+		"Reduced height, shortened reach, and jump height limited to half a block",
+		"키와 상호작용 사거리가 줄어들고 점프 높이가 반 블록으로 제한됩니다"),
 	DEMENTIA("Dementia", "치매", ChatFormatting.DARK_BLUE,
 		"Inventory items periodically shuffle and hide until clicked",
 		"인벤토리 아이템이 무작위로 섞이고 클릭 전까지 숨겨집니다"),
@@ -131,8 +131,11 @@ public enum ConditionType {
 		"Staying in wide open outdoor spaces triggers panic debuffs",
 		"탁 트인 야외에 오래 있으면 공황 디버프에 걸립니다"),
 	ACROPHOBIA("Acrophobia", "고소공포증", ChatFormatting.WHITE,
-		"Being at Y=60 or higher causes screen shaking, nausea, and slowness",
-		"Y좌표 60 이상에 있으면 화면 떨림과 멀미, 구속에 걸립니다");
+		"Being at Y=65 or higher causes screen shaking, nausea, and slowness",
+		"Y좌표 65 이상에 있으면 화면 떨림과 멀미, 구속에 걸립니다"),
+	ARACHNOPHOBIA("Arachnophobia", "거미공포증", ChatFormatting.DARK_RED,
+		"Getting near spiders or cave spiders causes screen shaking, weakness, and slowness",
+		"거미나 동굴 거미 근처에 가면 화면 떨림과 나약함, 구속에 걸립니다");
 
 	public final String displayName;
 	public final String displayNameKo;

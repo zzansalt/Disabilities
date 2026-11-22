@@ -179,7 +179,7 @@ public final class ConditionStore {
 	}
 
 	public static void notifyPlayer(ServerPlayer player, ConditionType condition, String verb) {
-		if (has(player.getUUID(), ConditionType.ANOSOGNOSIA)) {
+		if (condition != ConditionType.ANOSOGNOSIA && has(player.getUUID(), ConditionType.ANOSOGNOSIA)) {
 			return;
 		}
 		Component msg;

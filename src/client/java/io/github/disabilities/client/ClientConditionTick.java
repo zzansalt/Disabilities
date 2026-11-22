@@ -10,7 +10,9 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.monster.spider.Spider;
 
+import java.util.List;
 import java.util.Random;
 
 public final class ClientConditionTick {
@@ -49,6 +51,7 @@ public final class ClientConditionTick {
 		tickParkinsons(player);
 		tickSeizureCamera(player);
 		tickAcrophobia(player);
+		tickArachnophobia(mc, player);
 		tickCerebralPalsy(mc);
 		tickNarcolepsy();
 		tickAdhd(player);
@@ -83,12 +86,32 @@ public final class ClientConditionTick {
 	}
 
 	private static void tickAcrophobia(LocalPlayer player) {
-		if (!ClientConditionState.hasLocal(ConditionType.ACROPHOBIA) || player.getY() < 60.0) {
+		if (!ClientConditionState.hasLocal(ConditionType.ACROPHOBIA) || player.getY() < 65.0) {
 			return;
 		}
-		float intensity = Math.min(2.8f, 0.9f + (float) ((player.getY() - 60.0) * 0.03));
+		float intensity = Math.min(2.8f, 0.9f + (float) ((player.getY() - 65.0) * 0.03));
 		float shakeYaw = (RANDOM.nextFloat() * 2.0f - 1.0f) * intensity;
 		float shakePitch = (RANDOM.nextFloat() * 2.0f - 1.0f) * intensity * 0.7f;
+		player.setYRot(player.getYRot() + shakeYaw);
+		player.setXRot(Math.clamp(player.getXRot() + shakePitch, -90.0f, 90.0f));
+	}
+
+	private static void tickArachnophobia(Minecraft mc, LocalPlayer player) {
+		if (!ClientConditionState.hasLocal(ConditionType.ARACHNOPHOBIA) || mc.level == null) {
+			return;
+		}
+		List<Spider> spiders = mc.level.getEntitiesOfClass(Spider.class, player.getBoundingBox().inflate(10.0), Spider::isAlive);
+		if (spiders.isEmpty()) {
+			return;
+		}
+		double minDist = 10.0;
+		for (Spider s : spiders) {
+			minDist = Math.min(minDist, player.distanceTo(s));
+		}
+		float proximity = (float) Math.clamp(1.0 - (minDist / 10.0), 0.2, 1.0);
+		float intensity = 0.8f + proximity * 2.4f;
+		float shakeYaw = (RANDOM.nextFloat() * 2.0f - 1.0f) * intensity;
+		float shakePitch = (RANDOM.nextFloat() * 2.0f - 1.0f) * intensity * 0.75f;
 		player.setYRot(player.getYRot() + shakeYaw);
 		player.setXRot(Math.clamp(player.getXRot() + shakePitch, -90.0f, 90.0f));
 	}

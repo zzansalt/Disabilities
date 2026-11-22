@@ -129,14 +129,24 @@ public class Disabilities implements ModInitializer {
 			}
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
 				SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.8f, 1.25f);
-			Component msg = ModConfig.isKorean()
-				? Component.literal("[Disabilities] ").withStyle(ChatFormatting.GREEN)
-					.append(Component.literal(target.getDisplayName()).withStyle(target.color, ChatFormatting.BOLD))
-					.append(Component.literal(" 질병이 치료되었습니다!").withStyle(ChatFormatting.WHITE))
-				: Component.literal("[Disabilities] ").withStyle(ChatFormatting.GREEN)
-					.append(Component.literal("Cured ").withStyle(ChatFormatting.WHITE))
-					.append(Component.literal(target.getDisplayName()).withStyle(target.color, ChatFormatting.BOLD))
-					.append(Component.literal("!").withStyle(ChatFormatting.WHITE));
+			boolean stillMasked = ConditionStore.has(player.getUUID(), ConditionType.ANOSOGNOSIA);
+			Component msg;
+			if (stillMasked) {
+				msg = ModConfig.isKorean()
+					? Component.literal("[Disabilities] ").withStyle(ChatFormatting.GREEN)
+						.append(Component.literal("알 수 없는 질병이 치료되었습니다!").withStyle(ChatFormatting.WHITE))
+					: Component.literal("[Disabilities] ").withStyle(ChatFormatting.GREEN)
+						.append(Component.literal("Cured an unknown condition!").withStyle(ChatFormatting.WHITE));
+			} else {
+				msg = ModConfig.isKorean()
+					? Component.literal("[Disabilities] ").withStyle(ChatFormatting.GREEN)
+						.append(Component.literal(target.getDisplayName()).withStyle(target.color, ChatFormatting.BOLD))
+						.append(Component.literal(" 질병이 치료되었습니다!").withStyle(ChatFormatting.WHITE))
+					: Component.literal("[Disabilities] ").withStyle(ChatFormatting.GREEN)
+						.append(Component.literal("Cured ").withStyle(ChatFormatting.WHITE))
+						.append(Component.literal(target.getDisplayName()).withStyle(target.color, ChatFormatting.BOLD))
+						.append(Component.literal("!").withStyle(ChatFormatting.WHITE));
+			}
 			player.sendSystemMessage(msg);
 			ConditionStore.syncAll(player.level().getServer());
 		}

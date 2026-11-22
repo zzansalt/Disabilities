@@ -13,12 +13,15 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class CureSelectionScreen extends Screen {
 	private static final int PER_PAGE = 5;
 
 	private final int handOrdinal;
+	private final List<ConditionType> activeSnapshot;
+	private final boolean maskedByAnosognosia;
 	private int page = 0;
 
 	private int panelLeft;
@@ -34,6 +37,11 @@ public class CureSelectionScreen extends Screen {
 	public CureSelectionScreen(int handOrdinal) {
 		super(Component.literal(ModConfig.isKorean() ? "치료제" : "Cure"));
 		this.handOrdinal = handOrdinal;
+		this.maskedByAnosognosia = ClientConditionState.hasLocal(ConditionType.ANOSOGNOSIA);
+		this.activeSnapshot = new ArrayList<>(ClientConditionState.localConditions());
+		if (this.maskedByAnosognosia) {
+			Collections.shuffle(this.activeSnapshot);
+		}
 	}
 
 	@Override
@@ -47,24 +55,30 @@ public class CureSelectionScreen extends Screen {
 		this.panelLeft = (this.width - this.panelWidth) / 2;
 		this.panelTop = (this.height - this.panelHeight) / 2;
 
-		List<ConditionType> active = new ArrayList<>(ClientConditionState.localConditions());
-		int totalPages = Math.max(1, (active.size() + PER_PAGE - 1) / PER_PAGE);
+		int totalPages = Math.max(1, (this.activeSnapshot.size() + PER_PAGE - 1) / PER_PAGE);
 		if (this.page >= totalPages) {
 			this.page = totalPages - 1;
 		}
 
 		int start = this.page * PER_PAGE;
-		int end = Math.min(active.size(), start + PER_PAGE);
+		int end = Math.min(this.activeSnapshot.size(), start + PER_PAGE);
 
 		int btnX = this.panelLeft + 16;
 		int btnW = this.panelWidth - 32;
 		int y = this.panelTop + 36;
 
 		for (int i = start; i < end; i++) {
-			ConditionType condition = active.get(i);
-			Component label = Component.literal((ko ? "치료: " : "Cure: "))
-				.withStyle(ChatFormatting.WHITE)
-				.append(Component.literal(condition.getDisplayName()).withStyle(condition.color, ChatFormatting.BOLD));
+			ConditionType condition = this.activeSnapshot.get(i);
+			Component label;
+			if (this.maskedByAnosognosia) {
+				label = Component.literal(ko ? "치료: " : "Cure: ")
+					.withStyle(ChatFormatting.WHITE)
+					.append(Component.literal("???").withStyle(ChatFormatting.GRAY, ChatFormatting.BOLD));
+			} else {
+				label = Component.literal(ko ? "치료: " : "Cure: ")
+					.withStyle(ChatFormatting.WHITE)
+					.append(Component.literal(condition.getDisplayName()).withStyle(condition.color, ChatFormatting.BOLD));
+			}
 			Button btn = Button.builder(label, b -> {
 				ClientPlayNetworking.send(new ModPackets.CureConditionPacket(condition.ordinal(), this.handOrdinal));
 				this.onClose();
@@ -137,11 +151,18 @@ public class CureSelectionScreen extends Screen {
 			int descBoxTop = this.panelTop + this.panelHeight - 56;
 			int descBoxBottom = this.panelTop + this.panelHeight - 31;
 			graphics.fill(this.panelLeft + 14, descBoxTop, this.panelLeft + this.panelWidth - 14, descBoxBottom, 0xB00B1316);
-			String footerText = hovered != null
-				? hovered.getDescription()
-				: (ko ? "버튼에 마우스를 올리면 질병 설명이 표시됩니다." : "Hover over a condition to view its description.");
+			String footerText;
+			if (this.maskedByAnosognosia) {
+				footerText = ko
+					? "??? (질병인식불능증으로 인해 어떤 질병인지 구분할 수 없습니다.)"
+					: "??? (Anosognosia prevents you from identifying your conditions.)";
+			} else {
+				footerText = hovered != null
+					? hovered.getDescription()
+					: (ko ? "버튼에 마우스를 올리면 질병 설명이 표시됩니다." : "Hover over a condition to view its description.");
+			}
 			List<FormattedCharSequence> lines = this.font.split(
-				Component.literal(footerText).withStyle(hovered != null ? ChatFormatting.WHITE : ChatFormatting.GRAY),
+				Component.literal(footerText).withStyle(hovered != null && !this.maskedByAnosognosia ? ChatFormatting.WHITE : ChatFormatting.GRAY),
 				this.panelWidth - 36
 			);
 			int ly = descBoxTop + 4;
