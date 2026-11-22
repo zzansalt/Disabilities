@@ -45,6 +45,7 @@ public class Disabilities implements ModInitializer {
 		PayloadTypeRegistry.clientboundPlay().register(ModPackets.CompulsionPacket.ID, ModPackets.CompulsionPacket.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ModPackets.ConcealedSlotsPacket.ID, ModPackets.ConcealedSlotsPacket.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ModPackets.OpenGuiPacket.ID, ModPackets.OpenGuiPacket.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ModPackets.ConfigSyncPacket.ID, ModPackets.ConfigSyncPacket.CODEC);
 
 		PayloadTypeRegistry.serverboundPlay().register(ModPackets.CureConditionPacket.ID, ModPackets.CureConditionPacket.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(ModPackets.CureConditionPacket.ID, (payload, context) ->
@@ -68,7 +69,10 @@ public class Disabilities implements ModInitializer {
 
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(ConditionTickHandler::onAfterDamage);
 
-		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> ConditionStore.syncAll(server));
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+			ConditionStore.syncAll(server);
+			ConditionStore.syncConfigTo(handler.player);
+		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> ConditionTickHandler.removePlayer(handler.player.getUUID()));
 
 		PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {

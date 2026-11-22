@@ -2,6 +2,7 @@ package io.github.disabilities.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -85,11 +86,89 @@ public final class DisabilityCommands {
 				.then(Commands.literal("reload")
 					.executes(ctx -> {
 						ModConfig.load();
+						ConditionStore.syncConfig(ctx.getSource().getServer());
 						sendSuccess(ctx, ModConfig.isKorean()
-							? "설정을 다시 불러왔습니다. 현재 언어: " + ModConfig.getLanguage().key
-							: "Reloaded config. Current language: " + ModConfig.getLanguage().key);
+							? "설정을 다시 불러와 동기화했습니다. (언어: " + ModConfig.getLanguage().key + ", 고소공포증 Y: " + ModConfig.getAcrophobiaY() + ")"
+							: "Reloaded & synced config. (lang: " + ModConfig.getLanguage().key + ", acrophobia Y: " + ModConfig.getAcrophobiaY() + ")");
 						return 1;
 					}))
+				.then(Commands.literal("config")
+					.then(Commands.literal("acrophobia")
+						.executes(ctx -> {
+							int y = ModConfig.getAcrophobiaY();
+							sendSuccess(ctx, ModConfig.isKorean()
+								? "현재 고소공포증 발동 높이: Y=" + y
+								: "Current Acrophobia Y threshold: " + y);
+							return 1;
+						})
+						.then(Commands.argument("y", IntegerArgumentType.integer(-64, 320))
+							.executes(ctx -> {
+								int y = IntegerArgumentType.getInteger(ctx, "y");
+								ModConfig.setAcrophobiaY(y);
+								ConditionStore.syncConfig(ctx.getSource().getServer());
+								sendSuccess(ctx, ModConfig.isKorean()
+									? "고소공포증 발동 높이를 Y=" + y + "(으)로 변경하고 모든 플레이어에게 동기화했습니다."
+									: "Set Acrophobia Y threshold to " + y + " and synced to all players.");
+								return 1;
+							})))
+					.then(Commands.literal("tourette")
+						.then(Commands.literal("list")
+							.executes(ctx -> {
+								List<String> list = ModConfig.getTouretteMessages();
+								if (list.isEmpty()) {
+									sendSuccess(ctx, ModConfig.isKorean()
+										? "설정된 투렛 메시지가 없습니다. (기본값: 마인크래프트 랜덤 단어)"
+										: "No custom Tourette's messages configured. (Using random Minecraft words)");
+								} else {
+									StringBuilder sb = new StringBuilder();
+									for (int i = 0; i < list.size(); i++) {
+										if (i > 0) sb.append(", ");
+										sb.append('[').append(i + 1).append("] ").append(list.get(i));
+									}
+									sendSuccess(ctx, (ModConfig.isKorean() ? "투렛 메시지 목록 (" : "Tourette's messages (") + list.size() + "): " + sb);
+								}
+								return 1;
+							}))
+						.then(Commands.literal("add")
+							.then(Commands.argument("message", StringArgumentType.greedyString())
+								.executes(ctx -> {
+									String msg = StringArgumentType.getString(ctx, "message");
+									if (ModConfig.addTouretteMessage(msg)) {
+										ConditionStore.syncConfig(ctx.getSource().getServer());
+										sendSuccess(ctx, ModConfig.isKorean()
+											? "투렛 메시지를 추가했습니다: \"" + msg.trim() + "\""
+											: "Added Tourette's message: \"" + msg.trim() + "\"");
+										return 1;
+									}
+									sendFailure(ctx, ModConfig.isKorean() ? "빈 메시지는 추가할 수 없습니다." : "Cannot add an empty message.");
+									return 0;
+								})))
+						.then(Commands.literal("remove")
+							.then(Commands.argument("target", StringArgumentType.greedyString())
+								.executes(ctx -> {
+									String target = StringArgumentType.getString(ctx, "target");
+									String removed = ModConfig.removeTouretteMessage(target);
+									if (removed != null) {
+										ConditionStore.syncConfig(ctx.getSource().getServer());
+										sendSuccess(ctx, ModConfig.isKorean()
+											? "투렛 메시지를 삭제했습니다: \"" + removed + "\""
+											: "Removed Tourette's message: \"" + removed + "\"");
+										return 1;
+									}
+									sendFailure(ctx, ModConfig.isKorean()
+										? "해당 번호 또는 메시지를 찾을 수 없습니다: " + target
+										: "No matching index or message found: " + target);
+									return 0;
+								})))
+						.then(Commands.literal("clear")
+							.executes(ctx -> {
+								ModConfig.clearTouretteMessages();
+								ConditionStore.syncConfig(ctx.getSource().getServer());
+								sendSuccess(ctx, ModConfig.isKorean()
+									? "커스텀 투렛 메시지를 모두 초기화했습니다. (기본 랜덤 단어 사용)"
+									: "Cleared all custom Tourette's messages. (Reverted to random Minecraft words)");
+								return 1;
+							}))))
 		);
 
 		dispatcher.register(

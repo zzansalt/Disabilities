@@ -86,10 +86,11 @@ public final class ClientConditionTick {
 	}
 
 	private static void tickAcrophobia(LocalPlayer player) {
-		if (!ClientConditionState.hasLocal(ConditionType.ACROPHOBIA) || player.getY() < 65.0) {
+		int minY = ClientConditionState.getEffectiveAcrophobiaY();
+		if (!ClientConditionState.hasLocal(ConditionType.ACROPHOBIA) || player.getY() < minY) {
 			return;
 		}
-		float intensity = Math.min(2.8f, 0.9f + (float) ((player.getY() - 65.0) * 0.03));
+		float intensity = Math.min(2.8f, 0.9f + (float) ((player.getY() - minY) * 0.03));
 		float shakeYaw = (RANDOM.nextFloat() * 2.0f - 1.0f) * intensity;
 		float shakePitch = (RANDOM.nextFloat() * 2.0f - 1.0f) * intensity * 0.7f;
 		player.setYRot(player.getYRot() + shakeYaw);
@@ -177,7 +178,10 @@ public final class ClientConditionTick {
 			player.setXRot(Math.clamp(player.getXRot() + jerkPitch, -90.0f, 90.0f));
 		}
 		if (RANDOM.nextInt(400) == 0 && mc.getConnection() != null && !ClientConditionState.hasLocal(ConditionType.MUTE)) {
-			String outburst = RandomWordGenerator.pickWord(mc, RANDOM);
+			List<String> custom = ClientConditionState.getEffectiveTouretteMessages();
+			String outburst = !custom.isEmpty()
+				? custom.get(RANDOM.nextInt(custom.size()))
+				: RandomWordGenerator.pickWord(mc, RANDOM);
 			if (outburst != null && !outburst.isBlank()) {
 				mc.getConnection().sendChat(outburst);
 			}

@@ -3,10 +3,12 @@ package io.github.disabilities.client;
 import io.github.disabilities.ConditionAccess;
 import io.github.disabilities.ConditionType;
 import io.github.disabilities.client.render.HallucinationMobManager;
+import io.github.disabilities.config.ModConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.Container;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,6 +23,11 @@ public final class ClientConditionState {
 
 	private static boolean listVisible = true;
 	private static boolean dyslexiaExempt = false;
+
+	// Server-synced config values
+	private static boolean serverConfigSynced = false;
+	private static int serverAcrophobiaY = ModConfig.DEFAULT_ACROPHOBIA_Y;
+	private static List<String> serverTouretteMessages = List.of();
 
 	// Cerebral Palsy involuntary inputs
 	static int cpMoveDir = -1; // 0=fwd, 1=back, 2=left, 3=right
@@ -201,9 +208,29 @@ public final class ClientConditionState {
 		}
 	}
 
+	public static void setServerConfig(int acrophobiaY, List<String> touretteMessages) {
+		serverConfigSynced = true;
+		serverAcrophobiaY = acrophobiaY;
+		serverTouretteMessages = touretteMessages == null ? List.of() : List.copyOf(touretteMessages);
+	}
+
+	public static int getEffectiveAcrophobiaY() {
+		return serverConfigSynced ? serverAcrophobiaY : ModConfig.getAcrophobiaY();
+	}
+
+	public static List<String> getEffectiveTouretteMessages() {
+		if (serverConfigSynced && !serverTouretteMessages.isEmpty()) {
+			return serverTouretteMessages;
+		}
+		return ModConfig.getTouretteMessages();
+	}
+
 	public static void reset() {
 		ConditionAccess.clearClientCache();
 		HallucinationMobManager.clear();
+		serverConfigSynced = false;
+		serverAcrophobiaY = ModConfig.DEFAULT_ACROPHOBIA_Y;
+		serverTouretteMessages = List.of();
 		remainingTicks = 0;
 		timerEnabled = true;
 		compulsionLine = "";

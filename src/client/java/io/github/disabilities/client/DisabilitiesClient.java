@@ -34,6 +34,7 @@ public class DisabilitiesClient implements ClientModInitializer {
 			var mc = net.minecraft.client.Minecraft.getInstance();
 			return mc != null && mc.getLanguageManager() != null ? mc.getLanguageManager().getSelected() : "en_us";
 		});
+		ModConfig.setEffectiveAcrophobiaYSupplier(ClientConditionState::getEffectiveAcrophobiaY);
 
 		KeyMapping.Category category = KeyMapping.Category.register(Disabilities.id("disabilities"));
 		toggleListKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
@@ -84,6 +85,10 @@ public class DisabilitiesClient implements ClientModInitializer {
 					context.client().gui.setScreen(new CureSelectionScreen(payload.handOrdinal()));
 				}
 			})
+		);
+
+		ClientPlayNetworking.registerGlobalReceiver(ModPackets.ConfigSyncPacket.ID, (payload, context) ->
+			context.client().execute(() -> ClientConditionState.setServerConfig(payload.acrophobiaY(), payload.touretteMessages()))
 		);
 
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> ClientConditionState.reset());

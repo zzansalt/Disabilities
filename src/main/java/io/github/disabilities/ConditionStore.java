@@ -39,6 +39,7 @@ public final class ConditionStore {
 	private static boolean dirty = false;
 	private static int syncTicker = 0;
 	private static int saveTicker = 0;
+	private static int lastSyncedConfigVersion = -1;
 
 	private ConditionStore() {
 	}
@@ -218,6 +219,11 @@ public final class ConditionStore {
 		if (syncTicker >= 20) {
 			syncTicker = 0;
 			syncAll(server);
+			int cfgVer = ModConfig.getVersion();
+			if (cfgVer != lastSyncedConfigVersion) {
+				lastSyncedConfigVersion = cfgVer;
+				syncConfig(server);
+			}
 		}
 
 		saveTicker++;
@@ -247,6 +253,28 @@ public final class ConditionStore {
 		for (ServerPlayer player : online) {
 			ServerPlayNetworking.send(player, packet);
 		}
+	}
+
+	public static void syncConfig(MinecraftServer server) {
+		List<ServerPlayer> online = server.getPlayerList().getPlayers();
+		if (online.isEmpty()) {
+			return;
+		}
+		ModPackets.ConfigSyncPacket packet = new ModPackets.ConfigSyncPacket(
+			ModConfig.getAcrophobiaY(),
+			ModConfig.getTouretteMessages()
+		);
+		lastSyncedConfigVersion = ModConfig.getVersion();
+		for (ServerPlayer player : online) {
+			ServerPlayNetworking.send(player, packet);
+		}
+	}
+
+	public static void syncConfigTo(ServerPlayer player) {
+		ServerPlayNetworking.send(player, new ModPackets.ConfigSyncPacket(
+			ModConfig.getAcrophobiaY(),
+			ModConfig.getTouretteMessages()
+		));
 	}
 
 	public static void load(MinecraftServer server) {

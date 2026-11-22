@@ -156,6 +156,12 @@ public enum ConditionType {
 	}
 
 	public String getDescription() {
+		if (this == ACROPHOBIA) {
+			int y = ModConfig.getEffectiveAcrophobiaY();
+			return ModConfig.isKorean()
+				? "Y좌표 " + y + " 이상에 있으면 화면 떨림과 멀미, 구속에 걸립니다"
+				: "Being at Y=" + y + " or higher causes screen shaking, nausea, and slowness";
+		}
 		return ModConfig.isKorean() ? this.descriptionKo : this.description;
 	}
 

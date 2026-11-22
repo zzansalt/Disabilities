@@ -164,4 +164,31 @@ public final class ModPackets {
 			return ID;
 		}
 	}
+
+	public record ConfigSyncPacket(int acrophobiaY, List<String> touretteMessages) implements CustomPacketPayload {
+		public static final Type<ConfigSyncPacket> ID = new Type<>(Disabilities.id("config_sync"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, ConfigSyncPacket> CODEC = StreamCodec.of(
+			(buf, packet) -> {
+				buf.writeVarInt(packet.acrophobiaY);
+				buf.writeVarInt(packet.touretteMessages.size());
+				for (String msg : packet.touretteMessages) {
+					buf.writeUtf(msg);
+				}
+			},
+			buf -> {
+				int acroY = buf.readVarInt();
+				int size = buf.readVarInt();
+				List<String> msgs = new ArrayList<>(size);
+				for (int i = 0; i < size; i++) {
+					msgs.add(buf.readUtf());
+				}
+				return new ConfigSyncPacket(acroY, msgs);
+			}
+		);
+
+		@Override
+		public Type<? extends CustomPacketPayload> type() {
+			return ID;
+		}
+	}
 }

@@ -17,8 +17,11 @@
 * **치료제 아이템 (`disabilities:cure`)**:
   * 우클릭 시 현재 내가 보유 중인 질병 목록이 GUI로 열리며, 원하는 질병 1개를 선택해 치료 가능
   * **조합법**: 발광석 가루 4개 + 황금 사과 1개 + 유리병 1개 (크리에이티브 `음식 및 음료` 탭에서도 획득 가능)
-* **언어 설정 (`config/disabilities.properties`)**:
-  * 기본값 `language=auto` (마인크래프트 게임 언어를 자동 추적), `ko` / `en` / `auto` 지원 및 실시간 핫 리로드
+* **설정 파일 (`config/disabilities.properties`)**:
+  * `language=auto` (마인크래프트 게임 언어 자동 추적, `ko` / `en` / `auto` 지원)
+  * `acrophobia_y=65` (고소공포증 발동 Y좌표, 멀티플레이어에서는 **서버 설정**이 클라이언트에 자동 동기화됨)
+  * `tourette_messages=` (투렛 증후군 커스텀 채팅 메시지, 쉼표 `,`로 구분해 자유롭게 추가/삭제 가능. 비워두면 마인크래프트 랜덤 단어 사용)
+  * 파일 수정 시 재시작 없이 실시간 핫 리로드 및 서버→클라이언트 자동 동기화 지원
 * **HUD 토글 키**: 기본 **`K`** 키로 좌측 상단 질병 목록 HUD 표시/숨김 전환 (인벤토리 등 화면을 연 상태에서 마우스를 올리면 설명 툴팁 표시)
 
 ---
@@ -41,7 +44,12 @@
 | `/disability list [대상]` | 보유 중인 질병 목록 출력 |
 | `/disability reset` | 모든 플레이어의 질병 초기화 및 10분 타이머 복구 |
 | `/disability lang <en\|ko\|auto>` | 표시 언어 변경 및 `config/disabilities.properties` 저장 |
-| `/disability reload` | 설정 파일(`config/disabilities.properties`) 즉시 다시 불러오기 |
+| `/disability config acrophobia [Y좌표]` | 고소공포증 발동 높이 확인 또는 변경 (`-64~320`, 서버→클라 자동 동기화) |
+| `/disability config tourette list` | 설정된 커스텀 투렛 메시지 목록 및 번호 확인 |
+| `/disability config tourette add <메시지>` | 커스텀 투렛 메시지 추가 |
+| `/disability config tourette remove <번호\|메시지>` | 번호 또는 문구로 커스텀 투렛 메시지 삭제 |
+| `/disability config tourette clear` | 커스텀 투렛 메시지 전체 초기화 (기본 랜덤 단어로 복귀) |
+| `/disability reload` | 설정 파일(`config/disabilities.properties`) 즉시 다시 불러오기 및 동기화 |
 
 ---
 

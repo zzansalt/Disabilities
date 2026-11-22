@@ -3,6 +3,7 @@ package io.github.disabilities.logic;
 import io.github.disabilities.ConditionStore;
 import io.github.disabilities.ConditionType;
 import io.github.disabilities.Disabilities;
+import io.github.disabilities.config.ModConfig;
 import io.github.disabilities.network.ModPackets;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
@@ -551,7 +552,7 @@ public final class ConditionTickHandler {
 			return;
 		}
 		rt.acroTicker = 0;
-		if (player.getY() >= 65.0) {
+		if (player.getY() >= ModConfig.getAcrophobiaY()) {
 			player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 80, 0, true, false, true));
 			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 1, true, false, true));
 		}
